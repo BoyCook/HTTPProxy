@@ -4,19 +4,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
       http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-
     <display-name>HTTP proxy servlet</display-name>
-
-
     <servlet>
         <servlet-name>proxy</servlet-name>
-        <servlet-class>org.cccs.stubs.proxy.ProxyServlet</servlet-class>
+        <servlet-class>org.cccs.proxy.ProxyServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>proxy</servlet-name>
         <url-pattern>/proxy/*</url-pattern>
     </servlet-mapping>
-
 </web-app>

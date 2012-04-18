@@ -39,18 +39,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Commons / Apache -->
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-            <version>3.1</version>
-        </dependency>
-
         <!-- Logging -->
         <dependency>
             <groupId>log4j</groupId>
@@ -109,6 +97,7 @@
                 <configuration>
                     <scanIntervalSeconds>-1</scanIntervalSeconds>
                     <contextPath>/</contextPath>
+                    <webAppSourceDirectory>src/test/webapp</webAppSourceDirectory>
                     <connectors>
                         <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
                             <port>9001</port>
