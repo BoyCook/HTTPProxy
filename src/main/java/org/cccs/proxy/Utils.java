@@ -1,9 +1,9 @@
 package org.cccs.proxy;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -31,13 +31,27 @@ public final class Utils {
         return totalBytes;
     }
 
-    public static String concatComma(List<String> strings) {
-        Iterator<String> it = strings.iterator();
-        StringBuilder sb = new StringBuilder(it.next());
-        while (it.hasNext()) {
-            sb = sb.append(",").append(it.next());
+    public static String listStrings(List<String> strings) {
+        StringBuilder sb = new StringBuilder();
+        for (String string : strings) {
+            if (sb.length() > 0) {
+                sb.append(",");
+            }
+            sb.append(string);
         }
         return sb.toString();
     }
 
+    public static String stripContext(HttpServletRequest request) {
+        String context = request.getServletPath();
+        String path = request.getRequestURI() + "?" + request.getQueryString();
+        return stripContext(context, path);
+    }
+
+    public static String stripContext(String context, String path) {
+        if (path.startsWith(context)) {
+            return path.substring(context.length());
+        }
+        return path;
+    }
 }

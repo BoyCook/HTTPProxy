@@ -4,14 +4,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.lang.String.format;
-import static org.cccs.proxy.Utils.concatComma;
+import static org.cccs.proxy.Utils.listStrings;
 import static org.cccs.proxy.Utils.copyStream;
+import static org.cccs.proxy.Utils.stripContext;
 
 /**
  * User: boycook
@@ -20,29 +23,36 @@ import static org.cccs.proxy.Utils.copyStream;
  */
 public class Proxy {
 
-    private static final String HOST_HEADER = "Host";
+    public static final String HOST_HEADER = "Host";
+    public static final String DOMAIN = "domain";
     private String destination;
     private HttpServletRequest request;
     private HttpServletResponse response;
+    private Set<String> allowedPaths;
+    private final URL url;
 
-    public Proxy(String destination, HttpServletRequest request, HttpServletResponse response) {
+    public Proxy(String destination, HttpServletRequest request, HttpServletResponse response, Set<String> allowedPaths) throws MalformedURLException {
         this.destination = destination;
         this.request = request;
         this.response = response;
+        this.allowedPaths = allowedPaths;
+        this.url = new URL(getUrl(request));
     }
 
     public void doProxy() throws IOException {
-        HttpURLConnection connection = getConnection(request);
-        setRequestHeaders(connection, request);
-        setResponseHeaders(connection, response);
-
-        response.setStatus(connection.getResponseCode());
-        copyStream(connection.getInputStream(), response.getOutputStream());
+        if (isUrlAllowed(url)) {
+            HttpURLConnection connection = getConnection(request);
+            setRequestHeaders(connection, request);
+            setResponseHeaders(connection, response);
+            response.setStatus(connection.getResponseCode());
+            copyStream(connection.getInputStream(), response.getOutputStream());
+        } else {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            throw new SecurityException(format("You've attempted to access a URL that's not allowed [%s]", url));
+        }
     }
 
     private HttpURLConnection getConnection(HttpServletRequest request) throws IOException {
-        URL url = new URL(getUrl(request));
-
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoInput(true);
         connection.setDoOutput(true);
@@ -68,7 +78,7 @@ public class Proxy {
         Map<String, List<String>> responseHeaders = connection.getHeaderFields();
         for (Map.Entry<String, List<String>> entry : responseHeaders.entrySet()) {
             String headerName = entry.getKey();
-            String headerValue = concatComma(entry.getValue());
+            String headerValue = listStrings(entry.getValue());
             if (headerName != null) {
                 System.out.println(format("ResponseHeader: [%s] [%s]", headerName, headerValue));
                 response.setHeader(headerName, headerValue);
@@ -76,19 +86,16 @@ public class Proxy {
         }
     }
 
-    private String getUrl(HttpServletRequest request) {
-        String context = request.getServletPath();
-        String path = request.getRequestURI() + "?" + request.getQueryString();
-        if (path.startsWith(context)) {
-            path = path.substring(context.length());
-        }
-        String url = getDestination(request) + path;
-        System.out.println("Got URL: " + url);
-        return url;
+    protected boolean isUrlAllowed(URL url) {
+        return allowedPaths != null && allowedPaths.size() > 0 && allowedPaths.contains(url.getPath());
     }
 
-    private String getDestination(HttpServletRequest request) {
-        String domain = request.getParameter("domain");
+    protected String getUrl(HttpServletRequest request) {
+        return getDestination(request) + stripContext(request);
+    }
+
+    protected String getDestination(HttpServletRequest request) {
+        String domain = request.getParameter(DOMAIN);
         if (domain != null && domain.length() > 0) {
             return domain;
         }

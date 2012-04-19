@@ -9,10 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.String.format;
 
@@ -28,7 +25,9 @@ public class ProxyServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         System.out.println("ProxyServlet called...");
-        Proxy proxy = new Proxy(DESTINATION, request, response);
+        Set<String> allowed = new HashSet<String>();
+        allowed.add("/search");
+        Proxy proxy = new Proxy(DESTINATION, request, response, allowed);
         proxy.doProxy();
         super.service(request, response);
     }
