@@ -1,4 +1,4 @@
-A simple HTTP proxy servlet written in Java
+A simple HTTP proxy servlet written in Java, designed for use in integration tests
 
 http://www.google.com/search?btnG=1&pws=0&q=foo+bar
 http://localhost:9001/proxy/search?btnG=1&pws=0&q=foo+bar
