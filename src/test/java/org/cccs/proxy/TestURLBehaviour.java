@@ -1,8 +1,6 @@
 package org.cccs.proxy;
 
-import org.jmock.integration.junit4.JMock;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,7 +14,6 @@ import static org.junit.Assert.assertThat;
  * Date: 19/04/2012
  * Time: 09:02
  */
-@RunWith(JMock.class)
 public class TestURLBehaviour {
 
     @Test
